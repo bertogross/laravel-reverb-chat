@@ -26,7 +26,7 @@ Before you begin, ensure you have the following installed:
 - Docker
 - PHP >= 8.2
 - Composer
-- Node.js and npm
+- Node.js
 
 ### Installation Guide
 Follow these steps to set up the "laravel-reverb-chat" project on your local machine:
@@ -44,13 +44,13 @@ cd laravel-reverb-chat
 #### 1. Install Project Dependencies:
 Navigate to the project's root directory and install the required PHP and JavaScript dependencies:
 ```bash
-npm install
-```
-```bash
 composer install
 ```
+```bash
+npm install
+```
 
-#### 2. Generate application key:
+#### 2. Generate a new application key:
 ```bash
 php artisan key:generate
 ```
