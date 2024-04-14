@@ -89,6 +89,4 @@ php artisan reverb:start --host=127.0.0.1 --port=9000
 
 
 ### Contribute
-This README.md ensures that anyone, regardless of their familiarity with Laravel or Docker, can successfully set up and start using the chat application.
-
 Please feel free to fork the repository!
