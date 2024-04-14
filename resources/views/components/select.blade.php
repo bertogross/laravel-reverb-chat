@@ -1,7 +1,7 @@
 @props([
     'disabled' => false,
     'options' => [],
-    'selected' => null,
+    'selected' => request('u'),
     'text' => '- Select -',
 ])
 
