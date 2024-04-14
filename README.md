@@ -64,7 +64,7 @@ docker-compose up --build
 #### 4. Set Up the Database:
 Start your web server and set up the database schema with Laravel's migration feature:
 ```bash 
-php artisan migrate 
+php artisan migrate
 ```
 
 #### 5. Seed the Database:
