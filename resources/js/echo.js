@@ -9,15 +9,12 @@ import Pusher from "pusher-js";
 window.Pusher = Pusher;
 
 const xCSRFtoken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
-const currentUserId = parseInt(
-    document .querySelector('meta[name="current-user-id"]').getAttribute("content")
-);
 
 window.Echo = new Echo({
     broadcaster: "reverb",
     key: import.meta.env.VITE_REVERB_APP_KEY,
     wsHost: import.meta.env.VITE_REVERB_HOST,
-    wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
+    wsPort: import.meta.env.VITE_REVERB_PORT ?? 9000,
     wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? "https") === "https",
     enabledTransports: ["ws", "wss"],
@@ -29,7 +26,9 @@ window.Echo = new Echo({
     },
 });
 
-
+const currentUserId = parseInt(
+    document .querySelector('meta[name="current-user-id"]').getAttribute("content")
+);
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -94,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         /**
-         * This part initialize chat components.
+         * Initialize chat components.
          */
         initializeChat(userSelected);
     }
@@ -189,7 +188,7 @@ function initializeChat(userSelected) {
                 },
                 body: JSON.stringify({
                     message: message,
-                    recipient_id: parseInt(recipientId),
+                    recipient_id: recipientId,
                 }),
             })
             .then((response) => {
@@ -377,54 +376,51 @@ function initializeChat(userSelected) {
     function updateRecipientId(recipientId) {
         messagesContainer.innerHTML = "";
 
-        // Make the chat-container visible after a user is selected from the dropdown
-        if (recipientId) {
-            // Make the chat container visible
-            chatContainer.style.display = "block";
-
-            /**
-             * Listening for messages from Broadcast Name
-             * Subscribing to a Channel and Listening for Events
-             * DOC: https://laravel.com/docs/11.x/broadcasting#namespaces
-             *
-             * ChatMessages is the .Namespace\\Event\\Class :
-             *  app\Events\ChatMessages.php
-             * return event from broadcastWith()
-             */
-            window.Echo.private(channelName).listen(
-                ".chat.messages",
-                (event) => {
-                    // Log received event and channel name for debugging.
-                    //console.log('Listen: ', event);
-
-                    const isRecipientUserOnline =
-                        !!statusBetweenUsers[recipientId];
-                    console.log("isRecipientUserOnline", isRecipientUserOnline);
-
-                    let isRead = event.is_read;
-                    if (isRecipientUserOnline) {
-                        isRead = true;
-                    }
-
-                    populateChat(
-                        event.message_id,
-                        event.message,
-                        event.sender_id,
-                        event.sender_name,
-                        event.timestamp,
-                        isRead
-                    );
-                }
-            );
-
-            // Fetch and display messages for the new recipient
-            retrieveMessages(recipientId);
-        } else {
+        if (!recipientId) {
             // Hide the chat container if the placeholder is selected again
             chatContainer.style.display = "none";
 
             return;
         }
+
+        // Make the chat container visible
+        chatContainer.style.display = "block";
+
+        /**
+         * Listening for messages from Broadcast Name
+         * Subscribing to a Channel and Listening for Events
+         * DOC: https://laravel.com/docs/11.x/broadcasting#namespaces
+         *
+         * ChatMessages is the .Namespace\\Event\\Class :
+         *  app\Events\ChatMessages.php
+         * return event from broadcastWith()
+         */
+        window.Echo.private(channelName)
+            .listen(".chat.messages", (event) => {
+                // Log received event and channel name for debugging.
+                console.log('Listen: ', event);
+
+                const isRecipientUserOnline = !!statusBetweenUsers[recipientId];
+                console.log("isRecipientUserOnline", isRecipientUserOnline);
+
+                let isRead = event.is_read;
+                if (isRecipientUserOnline) {
+                    isRead = true;
+                }
+
+                populateChat(
+                    event.message_id,
+                    event.message,
+                    event.sender_id,
+                    event.sender_name,
+                    event.timestamp,
+                    isRead
+                );
+            }
+        );
+
+        // Fetch and display messages for the new recipient
+        retrieveMessages(recipientId);
     }
 
     /**
@@ -511,16 +507,13 @@ function initializeChat(userSelected) {
      * Call updateRecipientId on page load to set the initial recipient ID
      * @param {int} recipientId
      */
-    document.addEventListener(
-        "DOMContentLoaded",
-        updateRecipientId(recipientId)
-    );
+    updateRecipientId(recipientId);
 
     /**
      * Listen for changes on the select element
      */
     userSelected.addEventListener("change", function () {
-        window.location.reload();
+        window.location.href= '?u='+userSelected.value;
     });
 
     /**
