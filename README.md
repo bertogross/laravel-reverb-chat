@@ -62,7 +62,7 @@ docker-compose up --build
 ```
 
 #### 4. Set Up and Seed the Database:
-Start your web server and set up the database schema with Laravel's migration feature. By default, the password for all seeded user accounts is set to 'password'.
+Set up the database schema with Laravel's migration feature. By default, the password for all seeded user accounts is set to 'password'.
 ```bash 
 php artisan migrate:fresh --seed
 ```
