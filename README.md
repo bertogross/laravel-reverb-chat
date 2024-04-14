@@ -61,30 +61,24 @@ Ensure Docker is installed and running on your system. Then, initialize the Dock
 docker-compose up --build
 ```
 
-#### 4. Set Up the Database:
-Start your web server and set up the database schema with Laravel's migration feature:
-```bash 
-php artisan migrate
-```
-
-#### 5. Seed the Database:
-Populate the users table with sample data for testing purposes. You can review the seeded data, including login credentials, using tools like phpMyAdmin. By default, the password for all seeded user accounts is set to 'password'. To refresh your database and apply seeding, use:
+#### 4. Set Up and Seed the Database:
+Set up the database schema with Laravel's migration feature. By default, the password for all seeded user accounts is set to 'password'.
 ```bash 
 php artisan migrate:fresh --seed
 ```
 
-#### 6. Compile Frontend Assets (in a new terminal):
+#### 5. Compile Frontend Assets (in a new terminal):
 Compile the frontend assets using Laravel Mix:
 ```bash 
 npm run dev
 ```
 
-#### 7. Start the Laravel Development Server (in a new terminal):
+#### 6. Start the Laravel Development Server (in a new terminal):
 ```bash 
 php artisan serve
 ```
 
-#### 8. Start the Reverb Server (in a new terminal):
+#### 7. Start the Reverb Server (in a new terminal):
 ```bash 
 php artisan reverb:start --host=127.0.0.1 --port=9000
 ```
