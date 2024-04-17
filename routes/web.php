@@ -19,8 +19,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Chat Routes
-    Route::post('/get-messages', [ChatsController::class, 'index']);
     Route::post('/store-message', [ChatsController::class, 'store']);
+    Route::post('/retrieve-messages', [ChatsController::class, 'retrieve']);
     Route::post('/status-messages', [ChatsController::class, 'markAsRead']);
 });
 

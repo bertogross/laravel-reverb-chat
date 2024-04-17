@@ -58,7 +58,15 @@ class ChatMessages implements ShouldBroadcast
     public function broadcastWith()
     {
         $message = $this->message->message;
-        $messageDecripted = Crypt::decryptString($message);
+        try {
+            $messageDecripted = Crypt::decryptString($this->message->message);
+        } catch (\Exception $e) {
+            \Log::error("Error decrypting message: " . $e->getMessage());
+
+            return [];
+        }
+
+        // \Log::debug('Broadcasting chat message', ['user_id' => $this->user->id, 'recipient_id' => $this->recipientId, 'message' => $messageDecripted]);
 
         return [
             'message_id' => $this->message->id,

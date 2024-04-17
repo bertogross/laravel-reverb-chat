@@ -115,9 +115,7 @@ function initializeChat(userSelected) {
     const channelName = generateChannelName(currentUserId, recipientId);
 
     const chatContainer = document.getElementById("chat-container");
-    const messagesContainer = document.querySelector(
-        "#chat-container ul#messages-container"
-    );
+    const messagesContainer = document.querySelector("#chat-container ul#messages-container");
     const sendMessageButton = document.getElementById("send-message");
     const messageTextarea = document.getElementById("message-textarea");
     const errorContainer = document.getElementById("error-container");
@@ -492,8 +490,6 @@ function initializeChat(userSelected) {
      */
     function scrollToBottom(time = 100) {
         setTimeout(() => {
-            const messagesContainer =
-                document.getElementById("messages-container");
             if (messagesContainer) {
                 messagesContainer.scrollTo({
                     top: messagesContainer.scrollHeight,
@@ -541,7 +537,7 @@ function initializeChat(userSelected) {
     /**
      * Event debounced listener to paginate messages when scrolling to the top of the container
      */
-    document.querySelector("#messages-container").addEventListener(
+    messagesContainer.addEventListener(
         "scroll",
         debounce(async function () {
             // Check if the user is scrolling up and has reached the top of the container
