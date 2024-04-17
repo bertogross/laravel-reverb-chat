@@ -12,6 +12,62 @@ class ChatsController extends Controller
 {
 
     /**
+     * Store a new chat message in the database and broadcast it to the recipient
+     */
+    public function store(Request $request)
+    {
+        // Define validation rules
+        $rules = [
+            'message' => 'required|string|max:500',
+            'recipient_id' => 'required|integer',
+        ];
+
+        // Perform validation manually to customize the response
+        $validator = \Validator::make($request->all(), $rules);
+
+        // Check if validation fails
+        if ($validator->fails()) {
+            // Check specifically for message length error
+            if ($validator->errors()->has('message') && strlen($request->message) > 500) {
+                return response()->json(['error' => 'Message cannot exceed 500 characters.'], 422);
+            }
+
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        $currentUserId = auth()->id();
+
+        $messageContent = $request->message;
+        $recipientId = $request->recipient_id;
+
+        if ($currentUserId === $recipientId) {
+            return response()->json(['success' => false]);
+        }
+
+        try {
+            $user = auth()->user();
+
+            $messageContentEncrypted = Crypt::encryptString($messageContent);
+
+            $chatMessage = new Chat();
+            $chatMessage->sender_id = $user->id;
+            $chatMessage->recipient_id = $recipientId;
+            $chatMessage->message = $messageContentEncrypted;
+            $chatMessage->save();
+
+            // Broadcast it
+            event(new ChatMessages($user, $chatMessage, $recipientId));
+
+            return response()->json(['success' => true, 'message' => $messageContent, 'sender_name' => $user->name]);
+        } catch (\Exception $e) {
+            \Log::error('Error saving chat message: ' . $e->getMessage());
+
+            return response()->json(['error' => 'An error occurred while saving the message'], 500);
+        }
+
+    }
+
+    /**
      * Retrieves chat messages between the current user and the specified recipient.
      *
      * Fetches paginated chat messages involving the current user and the recipient,
@@ -20,7 +76,7 @@ class ChatsController extends Controller
      *
      * @param  int  $recipientId  The recipient's user ID.
      */
-    public function index(Request $request)
+    public function retrieve(Request $request)
     {
         $recipientId = $request->input('recipient_id');
 
@@ -77,62 +133,6 @@ class ChatsController extends Controller
 
             return response()->json(['error' => 'An error occurred while fetching messages'], 500);
         }
-    }
-
-    /**
-     * Store a new chat message in the database and broadcast it to the recipient
-     */
-    public function store(Request $request)
-    {
-        // Define validation rules
-        $rules = [
-            'message' => 'required|string|max:500',
-            'recipient_id' => 'required|integer',
-        ];
-
-        // Perform validation manually to customize the response
-        $validator = \Validator::make($request->all(), $rules);
-
-        // Check if validation fails
-        if ($validator->fails()) {
-            // Check specifically for message length error
-            if ($validator->errors()->has('message') && strlen($request->message) > 500) {
-                return response()->json(['error' => 'Message cannot exceed 500 characters.'], 422);
-            }
-
-            return response()->json(['error' => $validator->errors()], 422);
-        }
-
-        $currentUserId = auth()->id();
-
-        $messageContent = $request->message;
-        $recipientId = $request->recipient_id;
-
-        if ($currentUserId === $recipientId) {
-            return response()->json(['success' => false]);
-        }
-
-        try {
-            $user = auth()->user();
-
-            $messageContentEncrypted = Crypt::encryptString($messageContent);
-
-            $chatMessage  = new Chat();
-            $chatMessage ->sender_id = $user->id;
-            $chatMessage ->recipient_id = $recipientId;
-            $chatMessage ->message = $messageContentEncrypted;
-            $chatMessage ->save();
-
-            // Broadcast it
-            event(new ChatMessages($user, $chatMessage, $recipientId));
-
-            return response()->json(['success' => true, 'message' => $messageContent, 'sender_name' => $user->name]);
-        } catch (\Exception $e) {
-            \Log::error('Error saving chat message: ' . $e->getMessage());
-
-            return response()->json(['error' => 'An error occurred while saving the message'], 500);
-        }
-
     }
 
     /**
